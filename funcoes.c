@@ -572,3 +572,146 @@ void Extrato() {
   fclose(arquivo2);
 }
 //------------
+
+void Transferir() {
+  // template bonitinho:
+  printf("\n   +-------------------------------+");
+  printf("\n   |         TRANSFERÊNCIA         |");
+  printf("\n   +-------------------------------+ \n\n");
+  struct Cliente cliente;
+  int cpf_origem, cpf_destino;
+  int senha_origem;
+  float valor_transferencia;
+
+  /// validadores de cpf...
+  printf("      Digite o CPF do cliente de origem: ");
+  scanf("%d", &cpf_origem);
+
+  printf("      Digite a senha da conta de origem: ");
+
+  scanf("%d", &senha_origem);
+
+  printf("      Digite o CPF do cliente de destino: ");
+  scanf("%d", &cpf_destino);
+  printf("      Digite o valor a ser transferido: ");
+  scanf("%f", &valor_transferencia);
+
+  FILE *arquivo = fopen("dados.txt", "r");
+  FILE *arquivo2 = fopen("extrato.txt", "a");
+  FILE *temp_arquivo = fopen("temp.txt", "w");
+
+  int encontrado_origem = 0;
+  int encontrado_destino = 0;
+  float taxa = 0;
+  char linha[1000];
+
+  while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+
+    if (sscanf(linha,
+               "{\"nome\":\"%99[^\"]\", \"Tconta\":\"%49[^\"]\", \"cpf\":%d, "
+               "\"Senha\":%d, \"Saldo\":%f}",
+               cliente.nome_cliente, cliente.tipo_conta, &cliente.cpf,
+               &cliente.senha, &cliente.saldo) == 5) {
+      if (cliente.cpf == cpf_origem) {
+        if (cliente.senha != senha_origem) { // Verifique a senha
+          printf("\n   +---------------------------+");
+          printf("\n   | SENHA INCORRETA           |");
+          printf("\n   +---------------------------+ \n");
+          fclose(arquivo);
+          fclose(temp_arquivo);
+          return;
+        }
+
+        encontrado_origem = 1;
+        if (strcmp(cliente.tipo_conta, "Comum") == 0) {
+          if (cliente.saldo - valor_transferencia < -1000) {
+            printf("\n   +-----------------------------+");
+            printf("\n   | SALDO INSUFICIENTE (Comum)  |");
+            printf("\n   +-----------------------------+ \n");
+            fclose(arquivo);
+            fclose(temp_arquivo);
+            return;
+          } else {
+            taxa = (valor_transferencia * 0.05);
+            cliente.saldo -= (valor_transferencia + taxa); // 5% de taxa
+          }
+        } else if (strcmp(cliente.tipo_conta, "Plus") == 0) {
+          if (cliente.saldo - valor_transferencia < -5000) {
+            printf("\n   +-----------------------------+");
+            printf("\n   |   SALDO INSUFICIENTE (Plus) |");
+            printf("\n   +-----------------------------+ \n");
+            fclose(arquivo);
+            fclose(temp_arquivo);
+            return;
+          } else {
+            taxa = (valor_transferencia * 0.03);
+            cliente.saldo -= (valor_transferencia + taxa); // 3% de taxa
+          }
+        }
+        fprintf(
+            temp_arquivo,
+            "{\"nome\":\"%s\", \"Tconta\":\"%s\", \"cpf\":%d, \"Senha\":%d, "
+            "\"Saldo\":%.2f}\n",
+            cliente.nome_cliente, cliente.tipo_conta, cliente.cpf,
+            cliente.senha, cliente.saldo);
+      } else if (cliente.cpf == cpf_destino) {
+        encontrado_destino = 1;
+        cliente.saldo += valor_transferencia;
+        fprintf(
+            temp_arquivo,
+            "{\"nome\":\"%s\", \"Tconta\":\"%s\", \"cpf\":%d, \"Senha\":%d, "
+            "\"Saldo\":%.2f}\n",
+            cliente.nome_cliente, cliente.tipo_conta, cliente.cpf,
+            cliente.senha, cliente.saldo);
+      } else {
+        fprintf(temp_arquivo, "%s", linha);
+      }
+    }
+  }
+
+  snprintf(cliente.Tipo_Solicitacao, sizeof(cliente.Tipo_Solicitacao),
+           "Transferência     ");
+
+  snprintf(cliente.nome_cliente, sizeof(cliente.nome_cliente), "+");
+
+  // transformei em string
+  char saldo_convertido[200];
+  snprintf(saldo_convertido, sizeof(saldo_convertido), "%.2f",
+           valor_transferencia);
+  snprintf(cliente.tipo_conta, sizeof(cliente.tipo_conta), "%s",
+           saldo_convertido);
+
+  // Escreva as informações no arquivo de extrato.
+  fprintf(arquivo2,
+          "{\"TipoAction\":\"%s\",\"nome\":\"%s\", \"Tconta\":\"%s\", "
+          "\"cpf\":%d, "
+          "\"Senha\":%d, "
+          "\"Saldo\":%.2f}\n",
+          cliente.Tipo_Solicitacao, cliente.nome_cliente, cliente.tipo_conta,
+          cliente.cpf, cliente.senha, cliente.saldo);
+
+  fclose(arquivo);
+  fclose(arquivo2);
+  fclose(temp_arquivo);
+
+  // aqui verifica se bate as infos, se sim, ele printa o template, e apaga e
+  // renomeia o arq. temporário.
+  if (encontrado_origem && encontrado_destino) {
+    remove("dados.txt");
+    rename("temp.txt", "dados.txt");
+    printf("\n   +-----------------------------------+");
+    printf("\n   | TRANSFERÊNCIA REALIZADA COM ÊXITO |");
+    printf("\n   +-----------------------------------+ \n");
+  } else {
+    if (!encontrado_origem) {
+      printf("      Cliente de origem com CPF %d não foi encontrado.\n",
+             cpf_origem);
+      remove("temp.txt");
+    }
+    if (!encontrado_destino) {
+      printf("      Cliente de destino com CPF %d não foi encontrado.\n",
+             cpf_destino);
+      remove("temp.txt");
+    }
+  }
+}

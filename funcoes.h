@@ -18,4 +18,6 @@ bool verificarCPFExistente(int cpf);
 bool verificaCPFesenha(int cpf, int senha);
 void Extrato();
 void Debitar();
+void Transferir();
+
 

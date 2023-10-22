@@ -48,6 +48,7 @@ int main(void) {
       continuar();
       break;
     case 7:
+      Transferir();
       continuar();
       break;
     case 0:
