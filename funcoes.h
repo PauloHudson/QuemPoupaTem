@@ -10,3 +10,5 @@ struct Cliente {
 };
 
 int Menu();
+void Cadastrarcliente();
+bool verificarCPFExistente(int cpf);

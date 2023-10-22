@@ -24,7 +24,8 @@ int main(void) {
     //----------------------------------
     switch (seletor) {
     case 1:
-      continuar();
+      Cadastrarcliente();
+      continuar();      
       break;
     case 2:
       continuar();
