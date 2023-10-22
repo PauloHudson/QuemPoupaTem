@@ -183,3 +183,44 @@ void ApagarClientePorCPF() {
     printf("      Cliente com CPF %d não foi encontrado.\n", cpf_a_excluir);
   }
 }
+
+// funcão de listagem, quel lê linha por linha do arquivo,
+// com isso é atribuido as vars, e assim consigo printar.
+void ListarTodos() {
+  // template bonitinho:
+  printf("\n   +-------------------------------+");
+  printf("\n   |        LISTAR CLIENTES        |");
+  printf("\n   +-------------------------------+ \n\n");
+  // Abrir o arquivo em modo de leitura.
+  FILE *arquivo = fopen("dados.txt", "r");
+  if (arquivo == NULL) {
+    perror("Erro ao abrir o arquivo");
+    return;
+  }
+
+  struct Cliente cliente;
+  // armazena cada linha lida do dados.txt , é armazenada temporaraiamente
+  // enquanto processa para extrair informações do cliente
+  char linha[1000];
+
+  while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+    // Converter a linha para um cliente JSON scanf está analisando as infos
+    if (sscanf(linha,
+               "{\"nome\":\"%99[^\"]\", \"Tconta\":\"%49[^\"]\", \"cpf\":%d, "
+               "\"Senha\":%d, \"Saldo\":%f}",
+               cliente.nome_cliente, cliente.tipo_conta, &cliente.cpf,
+               &cliente.senha, &cliente.saldo) == 5) {
+      // Imprimir o nome do cliente
+      printf("   ---------------------------\n");
+      printf("   Nome: %s\n", cliente.nome_cliente);
+      printf("   TipodeConta: %s\n", cliente.tipo_conta);
+      printf("   CPF: %d\n", cliente.cpf);
+      printf("   Senha: %d\n", cliente.senha);
+      printf("   Saldo: %.2f\n", cliente.saldo);
+      printf("   ---------------------------\n");
+    }
+  }
+
+  // Fechar o arquivo.
+  fclose(arquivo);
+}

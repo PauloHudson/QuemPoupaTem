@@ -32,6 +32,7 @@ int main(void) {
       continuar();
       break;
     case 3:
+      ListarTodos();
       continuar();
       break;
     case 4:
