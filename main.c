@@ -44,6 +44,7 @@ int main(void) {
       continuar();
       break;
     case 6:
+      Extrato();
       continuar();
       break;
     case 7:

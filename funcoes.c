@@ -506,3 +506,69 @@ void Debitar() {
   }
 }
 //------------------------
+
+void Extrato() {
+  // template bonitinho:
+  printf("\n   +-------------------------------+");
+  printf("\n   |            EXTRATO            |");
+  printf("\n   +-------------------------------+ \n\n");
+  int cpf_a_extrato;
+  int senha_a_depositar;
+  struct Cliente cliente;
+  char linha[1000];
+  int encontrados = 0;
+  // Abra o arquivo de extrato em modo de leitura.
+  FILE *arquivo2 = fopen("extrato.txt", "r");
+  printf("      Digite o CPF da conta para exibir o extrato: ");
+  scanf("%d", &cpf_a_extrato);
+
+  // Verifique se o CPF existe no arquivo de dados.
+  printf("      Digite A senha da conta: ");
+  scanf("%d", &senha_a_depositar);
+
+  // Verifique se o CPF existe no arquivo de dados.
+  if (verificaCPFesenha(cpf_a_extrato, senha_a_depositar) == 0) {
+
+    fclose(arquivo2);
+    return;
+  } else {
+    cliente.cpf = cpf_a_extrato;
+    cliente.senha = senha_a_depositar;
+  }
+
+  // Abra o arquivo de extrato em modo de leitura.
+
+  printf("           Extrato para o CPF %d:\n", cpf_a_extrato);
+  printf("   "
+         "+------------------------------------------------------------------+"
+         "\n");
+  printf("   |    Tipo de Ação     | Nome/Taxa | T. Conta/Valor    | Saldo   "
+         "   |\n");
+  printf("   "
+         "+------------------------------------------------------------------+"
+         "\n");
+
+  while (fgets(linha, sizeof(linha), arquivo2) != NULL) {
+    if (sscanf(linha,
+               "{\"TipoAction\":\"%99[^\"]\",\"nome\":\"%99[^\"]\", "
+               "\"Tconta\":\"%49[^\"]\", \"cpf\":%d, \"Senha\":%d, "
+               "\"Saldo\":%f}",
+               cliente.Tipo_Solicitacao, cliente.nome_cliente,
+               cliente.tipo_conta, &cliente.cpf, &cliente.senha,
+               &cliente.saldo) == 6) {
+      if (cliente.cpf == cpf_a_extrato) {
+        printf("   |  %-18s | %-9s | %-17s | %10.2f | \n",
+               cliente.Tipo_Solicitacao, cliente.nome_cliente,
+               cliente.tipo_conta, cliente.saldo);
+      }
+    }
+  }
+
+  printf("   "
+         "+------------------------------------------------------------------+"
+         "\n");
+
+  // Feche o arquivo de extrato.
+  fclose(arquivo2);
+}
+//------------

@@ -16,5 +16,6 @@ void ListarTodos();
 void Depositar();
 bool verificarCPFExistente(int cpf);
 bool verificaCPFesenha(int cpf, int senha);
+void Extrato();
 void Debitar();
 
