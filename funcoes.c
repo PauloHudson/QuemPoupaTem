@@ -58,6 +58,39 @@ bool verificarCPFExistente(int cpf) {
   }
 }
 
+//------
+// A mesma coisa da de cima porém agora com senha!
+//------
+bool verificaCPFesenha(int cpf, int senha) {
+  FILE *arquivo = fopen("dados.txt", "r");
+
+  struct Cliente cliente;
+  char linha[1000];
+  bool cpfEncontrado = false;
+
+  while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+    if (sscanf(linha,
+               "{\"nome\":\"%99[^\"]\", \"Tconta\":\"%49[^\"]\", \"cpf\":%d, "
+               "\"Senha\":%d, \"Saldo\":%f}",
+               cliente.nome_cliente, cliente.tipo_conta, &cliente.cpf,
+               &cliente.senha, &cliente.saldo) == 5) {
+
+      if (cpf == cliente.cpf & senha == cliente.senha) {
+        cpfEncontrado = true;
+        break;
+      }
+    }
+  }
+
+  fclose(arquivo);
+
+  if (cpfEncontrado) {
+    return true; //
+  } else {
+    return false; //
+  }
+}
+
 void Cadastrarcliente() {
   struct Cliente cliente;
 
@@ -223,4 +256,110 @@ void ListarTodos() {
 
   // Fechar o arquivo.
   fclose(arquivo);
+}
+
+void Depositar() {
+  // template bonitinho:
+  printf("\n   +-------------------------------+");
+  printf("\n   |            DEPÓSITO           |");
+  printf("\n   +-------------------------------+ \n\n");
+  int cpf_a_Depositar;
+  int senha_a_depositar;
+  float saldo_Incrementar;
+  struct Cliente cliente;
+
+  // Abra o arquivo de dados para leitura e gravação.
+  FILE *arquivo = fopen("dados.txt", "r+");
+
+  // Abra o arquivo de extrato para adicionar informações.
+  FILE *arquivo2 = fopen("extrato.txt", "a");
+
+  // Solicite o CPF e Senha do cliente.
+  printf("      Digite o CPF de sua conta: ");
+  scanf("%d", &cpf_a_Depositar);
+
+  printf("      Digite A senha da sua conta: ");
+  scanf("%d", &senha_a_depositar);
+
+  // Verifique se o CPF existe no arquivo de dados.
+  if (verificaCPFesenha(cpf_a_Depositar, senha_a_depositar) == 0) {
+    printf("Cliente não cadastrado!\n");
+    fclose(arquivo);
+    fclose(arquivo2);
+    return;
+  } else {
+    cliente.cpf = cpf_a_Depositar;
+    cliente.senha = senha_a_depositar;
+  }
+
+  // Solicite o valor a ser depositado.
+  printf("      Digite quanto deseja depositar: ");
+  scanf("%f", &saldo_Incrementar);
+
+  // Abra um arquivo temporário para escrever os dados atualizados.
+  FILE *temp_arquivo = fopen("temp.txt", "w");
+
+  int encontrado = 0;
+  char linha[1000];
+
+  // Percorra o arquivo de dados linha por linha.
+  while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+    if (sscanf(linha,
+               "{\"nome\":\"%99[^\"]\", \"Tconta\":\"%49[^\"]\", \"cpf\":%d, "
+               "\"Senha\":%d, \"Saldo\":%f}",
+               cliente.nome_cliente, cliente.tipo_conta, &cliente.cpf,
+               &cliente.senha, &cliente.saldo) == 5) {
+      if (cliente.cpf == cpf_a_Depositar) {
+        encontrado = 1;
+        cliente.saldo += saldo_Incrementar;
+      }
+      // Escreva os dados atualizados no arquivo temporário.
+      fprintf(temp_arquivo,
+              "{\"nome\":\"%s\", \"Tconta\":\"%s\", \"cpf\":%d, \"Senha\":%d, "
+              "\"Saldo\":%.2f}\n",
+              cliente.nome_cliente, cliente.tipo_conta, cliente.cpf,
+              cliente.senha, cliente.saldo);
+    }
+  }
+
+  //
+  // aqui a lógica foi basicamente utilizar de variáveis já definidas no
+  // programa para que quando fossesmos fazer o extrato, conseguissemos
+  // re-utilizalas, sem alterar a estrutura do código inteira por isso também
+  // estamos definindo essas contas + e alterando valor de tipo conta para o
+  // valor de deposito, apenas estético e para ser usado no extrato!
+  //
+  snprintf(cliente.Tipo_Solicitacao, sizeof(cliente.Tipo_Solicitacao),
+           "Depósito.         ");
+  snprintf(cliente.nome_cliente, sizeof(cliente.nome_cliente), "+");
+
+  char saldo_convertido[200];
+  snprintf(saldo_convertido, sizeof(saldo_convertido), "%.2f",
+           saldo_Incrementar);
+  snprintf(cliente.tipo_conta, sizeof(cliente.tipo_conta), "%s",
+           saldo_convertido);
+
+  // Escreva as informações no arquivo de extrato.
+  fprintf(arquivo2,
+          "{\"TipoAction\":\"%s\",\"nome\":\"%s\", \"Tconta\":\"%s\", "
+          "\"cpf\":%d, "
+          "\"Senha\":%d, "
+          "\"Saldo\":%.2f}\n",
+          cliente.Tipo_Solicitacao, cliente.nome_cliente, cliente.tipo_conta,
+          cliente.cpf, cliente.senha, cliente.saldo);
+
+  // Feche os arquivos e renomeie o arquivo temporário para "dados.txt".
+  fclose(arquivo);
+  fclose(arquivo2);
+  fclose(temp_arquivo);
+  remove("dados.txt");
+  rename("temp.txt", "dados.txt");
+
+  // Exibir mensagem visual
+  if (encontrado) {
+    printf("      Foram depositados R$ %.2f \n\n", saldo_Incrementar);
+  } else {
+    printf("      Cliente com CPF %d não foi encontrado.\n", cpf_a_Depositar);
+    remove("temp.txt"); // Remova o arquivo temporário, pois não foi necessário.
+  }
 }

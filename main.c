@@ -36,6 +36,7 @@ int main(void) {
       continuar();
       break;
     case 4:
+      Depositar();
       continuar();
       break;
     case 5:

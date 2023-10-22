@@ -13,4 +13,5 @@ int Menu();
 void Cadastrarcliente();
 void ApagarClientePorCPF();
 void ListarTodos();
+void Depositar();
 bool verificarCPFExistente(int cpf);
