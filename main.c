@@ -40,6 +40,7 @@ int main(void) {
       continuar();
       break;
     case 5:
+      Debitar();
       continuar();
       break;
     case 6:
