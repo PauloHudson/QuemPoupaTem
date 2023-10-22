@@ -11,4 +11,5 @@ struct Cliente {
 
 int Menu();
 void Cadastrarcliente();
+void ApagarClientePorCPF();
 bool verificarCPFExistente(int cpf);

@@ -127,3 +127,59 @@ void Cadastrarcliente() {
   printf("\n   | CLIENTE CADASTRADO COM SUCESSO |");
   printf("\n   +--------------------------------+ \n");
 }
+
+void ApagarClientePorCPF() {
+  // template bonitinho:
+  printf("\n   +-------------------------------+");
+  printf("\n   |         APAGAR CLIENTE        |");
+  printf("\n   +-------------------------------+ \n\n");
+
+  int cpf_a_excluir;
+  printf("      Digite o CPF do cliente a ser excluído: ");
+  scanf("%d", &cpf_a_excluir);
+
+  // abrindo em leitura
+  FILE *arquivo = fopen("dados.txt", "r");
+
+  // temp em escrita
+  FILE *temp_arquivo = fopen("temp.txt", "w");
+
+  int encontrado = 0;
+  char linha[1000];
+
+  while (fgets(linha, sizeof(linha), arquivo) != NULL) {
+    // Converter a linha para um cliente JSON
+    struct Cliente cliente;
+    // ----
+    if (sscanf(linha,
+               "{\"nome\":\"%99[^\"]\", \"Tconta\":\"%49[^\"]\", \"cpf\":%d, "
+               "\"Senha\":%d, \"Saldo\":%f}",
+               cliente.nome_cliente, cliente.tipo_conta, &cliente.cpf,
+               &cliente.senha, &cliente.saldo) == 5) {
+      // Verifica se o CPF do cliente atual é igual ao CPF a ser excluído
+      if (cliente.cpf == cpf_a_excluir) {
+        encontrado =
+            1; // Cliente encontrado, não copia nada para o arquivo temporário
+        continue;
+      }
+    }
+    // Copia as linhas não relacionadas ao cliente
+    fprintf(temp_arquivo, "%s", linha);
+  }
+
+  // Fechar ambos os arquivos
+  fclose(arquivo);
+  fclose(temp_arquivo);
+
+  if (encontrado) {
+    // Remover o arquivo original e renomear o arquivo temporário para o nome
+    // original
+    remove("dados.txt");
+    rename("temp.txt", "dados.txt");
+    printf("\n   +--------------------------------+");
+    printf("\n   | CLIENTE EXCLUIDO COM SUCESSO   |");
+    printf("\n   +--------------------------------+ \n");
+  } else {
+    printf("      Cliente com CPF %d não foi encontrado.\n", cpf_a_excluir);
+  }
+}

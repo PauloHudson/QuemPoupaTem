@@ -28,6 +28,7 @@ int main(void) {
       continuar();      
       break;
     case 2:
+      ApagarClientePorCPF();
       continuar();
       break;
     case 3:
